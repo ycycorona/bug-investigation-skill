@@ -1,0 +1,4 @@
+interface:
+  display_name: "项目故障调查"
+  short_description: "为 y_trade 创建可追踪、可验证的故障调查与修复记录"
+  default_prompt: "使用 $bug-investigation-skill 调查这个问题并维护项目故障记录。"

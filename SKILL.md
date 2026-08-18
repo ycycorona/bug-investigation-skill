@@ -1,68 +1,73 @@
 ---
 name: bug-investigation-skill
-description: 为 y_trade_strategy 项目调查、记录并持续维护可验证的故障事实。用户报告 Bug、异常、超时、测试失败，要求排查、调试、定位根因、记录故障、修复问题或沉淀排障经验时使用。
+description: Investigate and document reproducible failures in the y_trade_strategy project using code, configuration, logs, tests, and runtime evidence. Use for bug reports, exceptions, timeouts, test failures, root-cause analysis, troubleshooting records, or explicitly authorized fixes. Preserve read-only boundaries for diagnosis and write repository records only when the user requests documentation or changes.
 ---
 
-# 项目故障调查
+# Bug Investigation
 
-基于真实代码、配置、日志和运行证据推进调查，区分已确认事实、合理推断和待验证假设。
+Build an evidence-backed account of a failure in `y_trade_strategy`. Keep confirmed facts, supported inferences, and unverified hypotheses distinct throughout the investigation.
 
-## 文档边界
+## Repository Sources of Truth
 
-- `doc_template/BUG_INVESTIGATION_RECORD_TPL.md`：新建故障记录时必须使用的项目模板。
-- `bug_list/bug_task_<topic>.md`：单个故障的现象、证据、假设、根因、修复和预防措施事实来源。
-- `docs/change_plans/<timestamp>_<topic>.md`：创建或更新故障记录以及实施修复时的单次变更执行记录。
-- 故障记录保存跨批次调查历史；详细命令、当次文件差异和验证证据同时索引到对应变更执行记录。
-- “诊断/排查”只授权只读调查，不自动授权修改代码、配置、外部系统或账户状态。
+- Read the repository-root `AGENTS.md` before acting.
+- Before creating or updating a bug record, read the project's `doc_template/BUG_INVESTIGATION_RECORD_TPL.md` completely and follow it.
+- Before creating a change-plan record, read the project's `doc_template/CHANGE_EXECUTION_RECORD_TPL.md` completely when it exists.
+- If either project template is missing, report the missing path and point the user to the corresponding packaged file in `assets/`. Do not copy a template into the project without authorization.
+- Packaged templates for manual project integration:
+  - `assets/BUG_INVESTIGATION_RECORD_TPL.md`
+  - `assets/CHANGE_EXECUTION_RECORD_TPL.md`
+- Store the durable history of one root-cause chain in `bug_list/bug_task_<topic>.md`.
+- Store the commands, file changes, and validation evidence for one write-enabled work batch in `docs/change_plans/<timestamp>_<topic>.md`.
+- Continue an existing bug record for the same issue. Create a separate record for an unrelated failure or a distinct root-cause chain.
 
-## 工作流程
+## Authorization Boundary
 
-1. 完整读取仓库根目录 `AGENTS.md` 和 `doc_template/BUG_INVESTIGATION_RECORD_TPL.md`。
-2. 使用 `rg`、`rg --files` 检查相关源码、配置、测试、日志入口、已有 Bug 记录和近期变更。
-3. 先确定失败边界：记录最后一个成功层级、首个失败层级，以及尚未执行的后续层级。
-4. 在写入任何仓库文件前，先创建本批次变更执行记录；已有同一问题的
-   `bug_task` 时持续更新，不重复创建。
-5. 按模板记录期望行为、复现条件、实际结果、影响范围和已脱敏证据。
-6. 建立假设表；每条假设必须标记 `待验证`、`已确认`、`已排除` 或 `证据不足`，
-   并写明支持或反驳证据。
-7. 使用最小、可逆、与问题范围一致的检查逐层验证。涉及外部系统时先做只读诊断。
-8. 只有用户明确授权修复时才实施变更；同步记录修复尝试、失败尝试、方案偏差和回滚方式。
-9. 运行与影响范围匹配的复现验证、回归测试和安全检查，记录命令、结果和未覆盖部分。
-10. 仅在根因得到证据支持、修复已验证且无必要工作遗留时标记 `resolved`；否则保持调查状态。
-11. 回填变更执行记录，按 `AGENTS.md` 检查差异并提交本批次相关文件。
+Classify the request before changing files or external state:
 
-若用户明确要求全程只读，不创建或更新仓库文档；在答复中说明因此未生成故障记录。
+- For diagnosis, investigation, review, or explanation, perform read-only inspection and report the findings. Do not create or update repository documents unless the user also asks to record or preserve the investigation.
+- When the user requests a bug record or repository changes, make the change-plan record the first artifact of that work batch, then create or update the bug record.
+- Implement a fix only when the user has explicitly requested or authorized implementation.
+- Treat external systems as read-only during diagnosis. Never infer permission to modify an account, order, service, or remote configuration.
+- If the user requires an entirely read-only session, do not create or update any repository document; state that no record was written.
 
-## 证据要求
+## Investigation Workflow
 
-- 优先记录可重复命令、最小必要日志、代码路径、配置值来源和时间线。
-- 用户截图或描述可作为现象证据，但不能替代协议、代码或运行时证据。
-- 不把时间相关性写成因果关系，不因重启恢复就虚构内部线程或产品缺陷。
-- 无法从现有证据解释的内部机制必须写为“未知”或“证据不足”。
-- 不编造日志、文件、测试结果、接口行为或外部文档结论。
-- 失败的调查尝试同样保留，避免后续重复走弯路。
+1. Inspect relevant source, configuration, tests, log entry points, existing bug records, and recent changes. Prefer `rg` and `rg --files` for repository searches.
+2. Define the failure boundary: identify the last verified successful layer, the first failing layer, and downstream layers that were not reached or not tested.
+3. Capture the expected behavior, reproduction conditions, actual result, impact, and the minimum sanitized evidence needed to support each claim.
+4. Maintain a hypothesis table. Mark each hypothesis as `pending`, `confirmed`, `ruled_out`, or `insufficient_evidence`, and link it to supporting or contradicting evidence.
+5. Test hypotheses with the smallest reversible checks that match the problem scope. Preserve failed investigation attempts when they prevent repeated dead ends.
+6. If a fix is authorized, record the chosen approach, rejected or failed attempts, deviations from the plan, and a practical rollback path before or alongside implementation.
+7. Run reproduction checks, regression tests, and safety checks proportional to the affected surface. Record exact commands, outcomes, and untested areas.
+8. Update both records with the current conclusion and remaining uncertainty. Follow `AGENTS.md` for diff review, task logging, and commit requirements.
 
-## 命名与状态
+## Evidence Standard
 
-- 文件名使用 `bug_list/bug_task_<topic>.md`，`topic` 为简短小写英文和下划线。
-- 一个根因链使用一份记录；不同根因或无关故障分别建档。
-- 推荐状态：`investigating`、`root_cause_confirmed`、`fixing`、`verifying`、`resolved`、`blocked`。
-- 优先级：P0 为生产或资金安全事故，P1 为核心功能阻断，P2 为功能异常但有绕过方案，
-  P3 为低影响或体验问题。
+- Prefer reproducible commands, minimally sufficient logs, concrete code paths, configuration provenance, timestamps, and runtime observations.
+- Treat a user report or screenshot as evidence of the visible symptom, not proof of the underlying mechanism.
+- Do not turn temporal correlation into causation or infer an internal thread, race, or product defect merely because a restart restored service.
+- Label mechanisms that the available evidence cannot establish as `unknown` or `insufficient_evidence`.
+- Never invent logs, files, test results, API behavior, or documentation conclusions.
+- Redact account identifiers, asset values, API keys, access tokens, cookies, passwords, and complete sensitive payloads from all records and responses.
 
-## 项目安全边界
+## Project-Specific Safety
 
-- 未经用户明确同意，所有 IB API 调查仅允许只读；禁止下单、改单、撤单和账户状态写操作。
-- 故障记录不得保存账户号、资产值、API Key、访问令牌、Cookie、密码或完整未脱敏消息。
-- 网络或代理问题要区分模型请求、Agent 启动的命令、IB Gateway 上游和本地 Socket API，
-  不得把不同链路的端口混为一谈。
-- 不为排障关闭安全开关、扩大权限或执行破坏性清理。
+- Keep all IB API investigation read-only unless the user explicitly authorizes a specific mutation. Do not place, modify, or cancel orders, and do not write account state.
+- For network or proxy failures, distinguish model requests, agent-launched commands, IB Gateway upstream traffic, and the local Socket API. Do not conflate ports or observations from different paths.
+- Do not disable safeguards, broaden permissions, or perform destructive cleanup as a troubleshooting shortcut.
 
-## 输出
+## Naming, Priority, and Status
 
-完成后简要说明：
+- Use `bug_list/bug_task_<topic>.md`, where `<topic>` is concise lowercase English joined with underscores.
+- Use project priority definitions: `P0` for production or capital-safety incidents, `P1` for a blocked core function, `P2` for a degraded function with a workaround, and `P3` for low-impact or usability issues.
+- Use these lifecycle states when the template does not define stricter values: `investigating`, `root_cause_confirmed`, `fixing`, `verifying`, `resolved`, and `blocked`.
+- Mark an issue `resolved` only when evidence supports the root cause, the fix is verified, and no required work remains. Otherwise keep the current investigation state and name the gap.
 
-- 故障记录和本批次变更执行记录路径。
-- 已确认的失败边界、根因或当前最强假设。
-- 已执行验证及结果。
-- 仍未知、阻塞或需要用户授权的事项。
+## Final Response
+
+Summarize:
+
+- paths to the bug record and change-plan record, or why no files were written;
+- the confirmed failure boundary and root cause, or the strongest current hypothesis with its confidence limits;
+- validation performed and its results;
+- remaining unknowns, blockers, untested areas, and any authorization needed from the user.

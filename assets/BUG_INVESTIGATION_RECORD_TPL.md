@@ -10,7 +10,7 @@
 | Priority | P0 / P1 / P2 / P3 |
 | Created at | {{YYYY-MM-DD HH:mm:ss and timezone}} |
 | Resolved at | Not resolved |
-| Environment | {{local / dev / staging / production; operating system and key versions}} |
+| Environment | {{local / dev / staging / production; operating system, runtime, and key versions}} |
 | Related development task | {{Path, or `None`}} |
 
 ## 2. Issue Summary
@@ -29,7 +29,7 @@
 
 ### Environment and Preconditions
 
-- {{Configuration, versions, data, or account mode. Redact sensitive values.}}
+- {{Configuration, versions, data, feature flags, or access mode. Redact sensitive values.}}
 
 ### Steps
 
@@ -51,7 +51,7 @@
 
 - Affected functionality: {{Details}}
 - Unaffected functionality: {{Details}}
-- Data, capital, or security impact: {{Details}}
+- Data, service, or security impact: {{Details}}
 - Temporary workaround: {{Details, or `None`}}
 
 ## 6. Evidence
@@ -127,8 +127,8 @@ Untested areas: {{Details, or `None`}}.
 ## 13. Safety and Privacy
 
 - [ ] No unauthorized external write was performed.
-- [ ] IB API access remained read-only; no order was placed, modified, or cancelled.
-- [ ] Account identifiers, asset values, credentials, cookies, and tokens were removed or redacted.
+- [ ] External services, production systems, and user or account state remained read-only unless explicitly authorized.
+- [ ] Personal data, infrastructure identifiers, credentials, cookies, and tokens were removed or redacted.
 - [ ] No safeguard was disabled and no permission was broadened for troubleshooting.
 
 ## 14. References
